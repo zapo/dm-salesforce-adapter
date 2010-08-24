@@ -4,11 +4,11 @@ module DataMapper::Salesforce
 
   module Types
   end
+
+  Property = Types
 end
 
-dir = File.expand_path(File.dirname(__FILE__) / :types)
-
-require dir / :serial
-require dir / :boolean
-require dir / :integer
-require dir / :float
+require 'dm-salesforce/types/serial'
+require 'dm-salesforce/types/boolean'
+require 'dm-salesforce/types/integer'
+require 'dm-salesforce/types/float'
