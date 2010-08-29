@@ -1,4 +1,4 @@
-module DataMapper::Salesforce
+class SalesforceAdapter
   class SoapWrapper
     class ClassesFailedToGenerate < StandardError; end
 

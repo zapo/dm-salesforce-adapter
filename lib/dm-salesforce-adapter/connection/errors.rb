@@ -1,5 +1,5 @@
-module DataMapper::Salesforce
-  class Connection
+class SalesforceAdapter::Connection
+  module Errors
     class Error             < StandardError; end
     class FieldNotFound     < Error; end
     class LoginFailed       < Error; end

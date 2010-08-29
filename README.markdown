@@ -1,8 +1,9 @@
-dm-salesforce
-=============
+dm-salesforce-adapter
+=====================
 
-A gem that provides a Salesforce Adapter for DataMapper 0.10.x and 1.0.x.  There are older
-versions of dm-salesforce specifically for 0.9.x, but they are no longer supported.
+This gem provides a Salesforce Adapter under DataMapper 1.0.x.  A version of
+this adapter supporting DM 0.10.x exists under the name "dm-salesforce".  Older
+versions of DM (0.9.x) are no longer supported.
 
 What it looks like
 ==================
@@ -57,7 +58,7 @@ What it looks like
     account.is_awesome = true
     account.save
 
-See [the fixtures](http://github.com/jpr5/dm-salesforce/tree/master/spec/fixtures) for more
+nSee [the fixtures](http://github.com/cloudcrowd/dm-salesforce-adapter/tree/master/spec/fixtures) for more
 examples.
 
 How it works

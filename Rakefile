@@ -6,14 +6,15 @@ require 'pp'
 require 'tmpdir'
 
 Bundler.require(:default, :runtime)
-require File.dirname(__FILE__) + '/lib/dm-salesforce'
+$: << lib_root = File.dirname(__FILE__) + '/lib/'
+require lib_root + 'dm-salesforce-adapter'
 
-GEM = "dm-salesforce"
-GEM_VERSION = DataMapper::Salesforce::VERSION
-AUTHORS = ["Yehuda Katz", 'Tim Carey-Smith']
-EMAIL = "wycats@gmail.com"
-HOMEPAGE = "http://www.yehudakatz.com"
-SUMMARY = "A DataMapper adapter to the Salesforce API"
+GEM = "dm-salesforce-adapter"
+GEM_VERSION = SalesforceAdapter::VERSION
+AUTHORS = ['Jordan Ritter', 'Tim Carey-Smith', "Yehuda Katz"]
+EMAIL = "jpr5@darkridge.com"
+HOMEPAGE = "http://www.darkridge.com/~jpr5"
+SUMMARY = "A SOAP-based DataMapper 1.0 adapter to access the Salesforce API"
 
 @spec = Gem::Specification.new do |s|
   s.name = GEM
@@ -62,7 +63,7 @@ end
 
 desc "Release the version"
 task :release => :repackage do
-  version = DataMapperSalesforce::VERSION
+  version = SalesforceAdapter::VERSION
   puts "Releasing #{version}"
 
   `git show-ref tags/v#{version}`
@@ -90,10 +91,10 @@ task :release => :repackage do
   version_file = File.dirname(__FILE__)+"/lib/#{GEM}/version.rb"
   File.open(version_file, "w") do |f|
     f.puts <<-EOT
-module DataMapperSalesforce
+module SalesforceAdapter
   VERSION = "#{next_version}"
 end
-    EOT
+EOT
   end
 
   puts "Committing the version change"

@@ -6,3 +6,4 @@ coverage/
 pkg/
 gbin
 tmp
+Gemfile.lock

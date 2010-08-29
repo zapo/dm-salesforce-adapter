@@ -1,5 +1,9 @@
-module DataMapper::Salesforce
+require 'dm-salesforce-adapter/connection/errors'
+
+class SalesforceAdapter
   class Connection
+    include Errors
+
     class HeaderHandler < SOAP::Header::SimpleHandler
       def initialize(tag, value)
         super(XSD::QName.new('urn:enterprise.soap.sforce.com', tag))
