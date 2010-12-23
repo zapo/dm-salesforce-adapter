@@ -15,13 +15,7 @@ What it looks like
         :salesforce
       end
 
-      # Old method for declaring which fields are Salesforce-style IDs.  Alternatively,
-      # can use the Salesforce-specific Serial custom DM type (see next model).
-      def self.salesforce_id_properties
-        :id
-      end
-
-      property :id,          String, :key => true
+      property :id,          Serial
       property :name,        String
       property :description, String
       property :fax,         String
@@ -58,18 +52,18 @@ What it looks like
     account.is_awesome = true
     account.save
 
-nSee [the fixtures](http://github.com/cloudcrowd/dm-salesforce-adapter/tree/master/spec/fixtures) for more
-examples.
+See [the fixtures](http://github.com/cloudcrowd/dm-salesforce-adapter/tree/master/spec/fixtures) for more examples.
 
 How it works
 ============
 
-Salesforce provides an XML-based WSDL definition of an existing schema/object model for
-download.  The dm-salesforce adapter uses this WSDL to auto-generate a SOAP-based Ruby
-driver and classes, which is then used to implement a basic, low-level DataMapper Adapter.
+Salesforce provides an XML-based WSDL definition of an existing schema/object
+model for download.  dm-salesforce-adapter uses this WSDL to auto-generate a
+SOAP-based Ruby driver and classes, which is then used to implement a basic,
+low-level DataMapper Adapter.
 
-Upon first access, the driver and classes are cached locally on disk in one of the
-following locations (in order of precedence):
+Upon first access, the driver and classes are cached locally on disk in one of
+the following locations (in order of precedence):
 
   * In `apidir`, defined in `database.yml` (see included database.yml-example)
   * In `ENV['SALESFORCE_DIR']`
