@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/cloudcrowd/dm-salesforce-adapter"
 
   s.add_dependency "httpclient",     "=2.1.5.2"
-  s.add_dependency "extlib",         "> 0.9.15"
+  s.add_dependency "extlib",         "~> 0.9.15"
   s.add_dependency "dm-core",        "~> 1.0.2"
   s.add_dependency "dm-validations", "~> 1.0.2"
   s.add_dependency "dm-types",       "~> 1.0.2"
