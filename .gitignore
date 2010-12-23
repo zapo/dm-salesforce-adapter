@@ -7,3 +7,4 @@ pkg/
 gbin
 tmp
 Gemfile.lock
+.bundle

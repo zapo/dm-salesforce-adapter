@@ -1,51 +1,12 @@
 require 'rake/gempackagetask'
 require 'rubygems/specification'
-require 'bundler'
 require 'date'
 require 'pp'
 require 'tmpdir'
 
-Bundler.require(:default, :runtime)
-$: << lib_root = File.dirname(__FILE__) + '/lib/'
-require lib_root + 'dm-salesforce-adapter'
+require 'bundler/setup'
 
-GEM = "dm-salesforce-adapter"
-GEM_VERSION = SalesforceAdapter::VERSION
-AUTHORS = ['Jordan Ritter', 'Tim Carey-Smith', "Yehuda Katz"]
-EMAIL = "jpr5@darkridge.com"
-HOMEPAGE = "http://www.darkridge.com/~jpr5"
-SUMMARY = "A SOAP-based DataMapper 1.0 adapter to access the Salesforce API"
-
-@spec = Gem::Specification.new do |s|
-  s.name = GEM
-  s.version = GEM_VERSION
-  s.platform = Gem::Platform::RUBY
-  s.has_rdoc = true
-  s.extra_rdoc_files = ["README.markdown", "LICENSE"]
-  s.summary = SUMMARY
-  s.description = s.summary
-  s.authors = AUTHORS
-  s.email = EMAIL
-  s.homepage = HOMEPAGE
-
-  bundle = Bundler::Definition.from_gemfile('Gemfile')
-  bundle.dependencies.each do |dep|
-    next unless dep.groups.include?(:runtime)
-    s.add_dependency(dep.name, dep.version_requirements.to_s)
-  end
-
-  s.require_path = 'lib'
-  s.files = %w(LICENSE README.markdown Rakefile) + Dir.glob("lib/**/*")
-end
-
-Rake::GemPackageTask.new(@spec) do |pkg|
-  pkg.gem_spec = @spec
-end
-
-desc "install the gem locally"
-task :install => [:package] do
-  sh %{gem install pkg/#{GEM}-#{GEM_VERSION} --no-ri --no-rdoc}
-end
+Bundler.require
 
 task :default => 'spec'
 require 'spec'
