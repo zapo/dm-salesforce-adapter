@@ -21,16 +21,15 @@ class SalesforceAdapter
     @connection ||= Connection.new(options["username"], options["password"], options["path"], options["apidir"])
   end
 
-  # FIXME: DM Adapters customarily throw exceptions when they
-  # experience errors, otherwise failed operations
-  # (e.g. Resource#save) still return true and thus confuse the
-  # caller.
+  # FIXME: DM Adapters customarily throw exceptions when they experience errors,
+  # otherwise failed operations (e.g. Resource#save) still return true and thus
+  # confuse the caller.
   #
-  # Someone needs to make a decision about legacy support and the
-  # consequences of changing the behaviour from
-  # broken-but-accustomed to correct-but-maybe-unexpected.  Maybe a
-  # config file option about whether to raise exceptions or for the
-  # user to always check Model#valid? + Model#salesforce_errors?
+  # Someone needs to make a decision about legacy support and the consequences
+  # of changing the behaviour from broken-but-typical to
+  # correct-but-maybe-unexpected.  Maybe a config file option about whether to
+  # raise exceptions or for the user to always check Model#valid? +
+  # Model#salesforce_errors?
   #
   # Needs to be applied to all CRUD operations.
   def create(resources)
@@ -85,14 +84,14 @@ class SalesforceAdapter
   #   In the typical case, response.size reflects the # of records returned.
   #   In the aggregation case, response.size reflects the count.
   #
-  # Interpretation of this field requires knowledge of whether we
-  # are expecting an aggregate result, thus the response is
-  # processed differently depending on invocation.
+  # Interpretation of this field requires knowledge of whether we are expecting
+  # an aggregate result, thus the response from execute_select() is processed
+  # differently depending on invocation (read vs. aggregate).
   def read(query)
     properties = query.fields
     repository = query.repository
 
-    response = execute_query(query)
+    response = execute_select(query)
     return [] unless response.records
 
     rows = response.records.inject([]) do |results, record|
@@ -107,8 +106,8 @@ class SalesforceAdapter
   end
 
   # http://www.salesforce.com/us/developer/docs/api90/Content/sforce_api_calls_soql.htm
-  # SOQL doesn't support anything but count(), so we catch it here
-  # and interpret the result.
+  # SOQL doesn't support anything but count(), so we catch it here and interpret
+  # the result.  Requires 'dm-aggregates' to be loaded.
   def aggregate(query)
     query.fields.each do |f|
       unless f.target == :all && f.operator == :count
@@ -116,11 +115,11 @@ class SalesforceAdapter
       end
     end
 
-    [ execute_query(query).size ]
+    [ execute_select(query).size ]
   end
 
   private
-  def execute_query(query)
+  def execute_select(query)
     repository = query.repository
     conditions = query.conditions.map {|c| conditions_statement(c, repository)}.compact.join(") AND (")
 

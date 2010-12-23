@@ -49,7 +49,8 @@ class SalesforceAdapter
 
     def field_name_for(klass_name, column)
       klass = SalesforceAPI.const_get(klass_name)
-      fields = [column, column.camel_case, "#{column}__c".downcase]
+      # extlib vs. activesupport
+      fields = [column, (column.camel_case rescue column.camelcase), "#{column}__c".downcase]
       options = /^(#{fields.join("|")})$/i
       matches = klass.instance_methods(false).grep(options)
       if matches.any?
@@ -97,10 +98,10 @@ class SalesforceAdapter
       begin
         result = driver.login(:username => @username, :password => @password).result
       rescue SOAP::FaultError => error
-        if error.faultcode.to_obj == "sf:INVALID_LOGIN" || error.faultcode.to_obj == "INVALID_LOGIN"
-          raise LoginFailed, "Could not login to Salesforce; #{error.faultstring.text}"
+        if error.faultcode.to_s =~ /INVALID_LOGIN/
+          raise LoginFailed, error.faultstring.to_s
         else
-          raise
+          raise error
         end
       end
       driver.endpoint_url = result.serverUrl
@@ -127,14 +128,14 @@ class SalesforceAdapter
       yield
     rescue SOAP::FaultError => error
       retry_count ||= 0
-      if error.faultcode.text == "sf:INVALID_SESSION_ID"
-        $stderr.puts "Got a invalid session id; reconnecting"
+      if error.faultcode.to_s =~ "INVALID_SESSION_ID"
+        DataMapper.logger.debug "Got a invalid session id; reconnecting" if DataMapper.logger
         @driver = nil
         login
         retry_count += 1
         retry unless retry_count > 5
       else
-        raise
+        raise error
       end
 
       raise SessionTimeout, "The Salesforce session could not be established"

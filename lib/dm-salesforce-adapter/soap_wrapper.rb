@@ -37,9 +37,7 @@ class SalesforceAdapter
         raise Errno::ENOENT, "Could not find the WSDL at #{wsdl_path}"
       end
 
-      unless File.directory?(wsdl_api_dir)
-        FileUtils.mkdir_p wsdl_api_dir
-      end
+      FileUtils.mkdir_p(wsdl_api_dir)
 
       generate_files unless files_exist?
 
