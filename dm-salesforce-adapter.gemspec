@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "httpclient",     "=2.1.5.2"
   s.add_dependency "extlib",         "~> 0.9.15"
+  s.add_dependency "data_objects",   "~> 0.10.2"
   s.add_dependency "dm-core",        "~> 1.0.2"
   s.add_dependency "dm-validations", "~> 1.0.2"
   s.add_dependency "dm-types",       "~> 1.0.2"
