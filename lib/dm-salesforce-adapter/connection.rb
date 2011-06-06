@@ -128,7 +128,7 @@ class SalesforceAdapter
       yield
     rescue SOAP::FaultError => error
       retry_count ||= 0
-      if error.faultcode.to_s =~ "INVALID_SESSION_ID"
+      if error.faultcode.to_s =~ /INVALID_SESSION_ID/
         DataMapper.logger.debug "Got a invalid session id; reconnecting" if DataMapper.logger
         @driver = nil
         login
