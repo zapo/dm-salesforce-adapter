@@ -8,7 +8,7 @@ require 'soap/header/simplehandler'
 require 'rexml/element'
 
 class SalesforceAdapter < ::DataMapper::Adapters::AbstractAdapter
-  Inflector = ::DataMapper.const_defined?(:Inflector) ? ::DataMapper::Inflector : ::Extlib::Inflection
+  Inflector = ::DataMapper::Inflector
 end
 
 require 'dm-salesforce-adapter/resource'

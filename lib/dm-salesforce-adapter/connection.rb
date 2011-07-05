@@ -49,6 +49,7 @@ class SalesforceAdapter
 
     def field_name_for(klass_name, column)
       klass = SalesforceAPI.const_get(klass_name)
+      # FIXME: Convert this and all other instances to use ::{DM,SalesforceAdapter}::Inflector
       fields = [column, (column.to_s.camel_case rescue column.to_s.camelcase), "#{column}__c".downcase]
       options = /^(#{fields.join("|")})$/i
       matches = klass.instance_methods(false).grep(options)
