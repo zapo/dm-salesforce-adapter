@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "dm-salesforce-adapter"
-  s.version          = "1.0.2"
+  s.version          = "1.0.3.rc1"
   s.platform         = Gem::Platform::RUBY
   s.has_rdoc         = true
   s.extra_rdoc_files = ["README.markdown", "LICENSE"]
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage         = "http://github.com/cloudcrowd/dm-salesforce-adapter"
 
   s.add_dependency "httpclient",     " =2.1.5.2"
-  s.add_dependency "data_objects",   "~> 0.10.2"
+  s.add_dependency "data_objects",   "~> 0.10.6"
   s.add_dependency "dm-core",        "~> 1.1.0"
   s.add_dependency "dm-validations", "~> 1.1.0"
   s.add_dependency "dm-types",       "~> 1.1.0"
