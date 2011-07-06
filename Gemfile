@@ -10,6 +10,7 @@ group :test do
   gem 'bundler',        '~> 1.0.0'
   gem 'ParseTree',                  :require => 'parse_tree'
   gem 'dm-sweatshop'
+  gem 'dm-sqlite-adapter'
 end
 
 # vim:ft=ruby
