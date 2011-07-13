@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "dm-salesforce-adapter"
-  s.version          = "1.0.3"
+  s.version          = "1.0.4.rc1"
   s.platform         = Gem::Platform::RUBY
   s.has_rdoc         = true
   s.extra_rdoc_files = ["README.markdown", "LICENSE"]
