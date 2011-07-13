@@ -5,7 +5,7 @@ module SalesforceAdapter::Property
 
     length 15
 
-    def self.dump(value, property)
+    def dump(value)
       value[0..14] unless value.blank?
     end
   end
