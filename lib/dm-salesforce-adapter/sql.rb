@@ -83,7 +83,7 @@ class SalesforceAdapter
     end
 
     def quote_value(value, property)
-      if property.type == Property::Boolean
+      if property.kind_of? Property::Boolean
         # True on salesforce needs to be TRUE/FALSE for WHERE clauses but not for inserts.
         return value == Property::Boolean::TRUE ? 'TRUE' : 'FALSE'
       end
