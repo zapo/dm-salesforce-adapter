@@ -10,5 +10,9 @@ module SalesforceAdapter::Property
     def typecast(value)
       [true, 1, '1', 'true', 'TRUE'].include?(value) ? TRUE : FALSE
     end
+
+    def custom?
+      true
+    end
   end
 end
