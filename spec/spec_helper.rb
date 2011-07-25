@@ -5,6 +5,7 @@ root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 $:.unshift root
 
 require 'logger'
+Dir.mkdir(root + "/tmp") unless File.exist?(root + "/tmp")
 ::DataMapper.logger = Logger.new(root + "/tmp/test.log")
 
 require 'spec/fixtures/account'
@@ -31,6 +32,8 @@ end
 require 'fileutils'
 api_dir = sfconfig["apidir"]
 wsdl    = sfconfig["path"]
+
+raise "WSDL not found: #{wsdl}" unless File.exist?(wsdl)
 
 FileUtils.rm_rf(api_dir)
 FileUtils.mkdir_p(api_dir)
