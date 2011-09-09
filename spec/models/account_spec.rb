@@ -1,3 +1,5 @@
+require 'spec/spec_helper'
+
 describe "Account" do
   describe "#first" do
     #pending "testing first should not be on account"
