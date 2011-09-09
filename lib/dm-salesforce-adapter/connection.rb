@@ -97,10 +97,10 @@ class SalesforceAdapter
       begin
         result = driver.login(:username => @username, :password => @password).result
       rescue SOAP::FaultError => error
-        if error.faultcode.to_s =~ /INVALID_LOGIN/
-          raise LoginFailed, error.faultstring.to_s
-        else
-          raise error
+        case error.faultcode.text
+        when "sf:INVALID_LOGIN" then raise LoginFailed, error.faultstring.text
+        # ...
+        else raise error
         end
       end
       driver.endpoint_url = result.serverUrl
@@ -127,17 +127,16 @@ class SalesforceAdapter
       yield
     rescue SOAP::FaultError => error
       retry_count ||= 0
-      if error.faultcode.to_s =~ /INVALID_SESSION_ID/
+
+      case error.faultcode.text
+      when "sf:INVALID_SESSION_ID" then
         DataMapper.logger.debug "Got a invalid session id; reconnecting" if DataMapper.logger
         @driver = nil
         login
         retry_count += 1
         retry unless retry_count > 5
-      else
-        raise error
+      else raise error
       end
-
-      raise SessionTimeout, "The Salesforce session could not be established"
     end
   end
 end
