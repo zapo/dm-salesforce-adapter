@@ -3,6 +3,13 @@ dm-salesforce-adapter
 
 This gem provides a Salesforce Adapter under DataMapper 1.1.x.
 
+Current branch motivations:
+
+- Switch from soap4r to savonrb for SOAP messages creation
+- No more static wsdl soap classes
+- I ran into problems with SOAP messages encoding (when using UTF-8 characters) that seem to be due to soap4r lib
+
+
 Past version support:
 
 - DataMapper 1.0.x is supported by dm-salesforce-adapter 1.0.1 (https://github.com/cloudcrowd/dm-salesforce-adapter/tree/v1.0.1)
