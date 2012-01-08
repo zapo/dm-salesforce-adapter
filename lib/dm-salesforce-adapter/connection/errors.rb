@@ -1,12 +1,16 @@
 class SalesforceAdapter::Connection
   module Errors
     class Error             < StandardError; end
-    class FieldNotFound     < Error; end
+    class FieldNotFound     < Error
+      def initialize(field, resource)
+        super("Field \"#{field}\" not defined for resource #{resource}")
+      end
+    end
+    
     class LoginFailed       < Error; end
     class SessionTimeout    < Error; end
     class UnknownStatusCode < Error; end
     class ServerUnavailable < Error; end
-
 
     class SOAPError      < Error
       def initialize(message, result)
@@ -19,11 +23,11 @@ class SalesforceAdapter::Connection
       end
 
       def failed_records
-        @result.reject {|r| r.success}
+        @result.reject {|r| r[:success]}
       end
 
       def successful_records
-        @result.select {|r| r.success}
+        @result.select {|r| r[:success]}
       end
 
       def result_message
@@ -33,12 +37,12 @@ class SalesforceAdapter::Connection
       end
 
       def message_for_record(record)
-        record.errors.map {|e| "#{e.statusCode}: #{e.message}"}.join(", ")
+        [record[:errors]].flatten.map {|e| "#{e[:statusCode]}: #{e[:message]}"}.join(", ")
       end
 
       def server_unavailable?
         failed_records.any? do |record|
-          record.errors.any? {|e| e.statusCode == "SERVER_UNAVAILABLE"}
+          [record[:errors]].flatten.any? {|e| e[:statusCode] == "SERVER_UNAVAILABLE"}
         end
       end
     end

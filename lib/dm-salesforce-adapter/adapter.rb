@@ -1,24 +1,19 @@
-
 class SalesforceAdapter
   include SQL
 
   def initialize(name, uri_or_options)
     super
     @resource_naming_convention = proc do |value|
-      klass = Inflector.constantize(value)
-      if klass.respond_to?(:salesforce_class)
-        klass.salesforce_class
-      else
-        value.split("::").last
-      end
+      value.split("::").last
     end
+    
     @field_naming_convention = proc do |property|
       connection.field_name_for(property.model.storage_name(name), property.name.to_s)
     end
   end
 
   def connection
-    @connection ||= Connection.new(options["username"], options["password"], options["path"], options["apidir"])
+    @connection ||= Connection.new(options["username"], options["password"], options["path"])
   end
 
   # FIXME: DM Adapters customarily throw exceptions when they experience errors,
@@ -33,40 +28,23 @@ class SalesforceAdapter
   #
   # Needs to be applied to all CRUD operations.
   def create(resources)
-    arr = resources.map do |resource|
-      make_salesforce_obj(resource, resource.dirty_attributes)
-    end
 
-    result = connection.create(arr)
-    result.each_with_index do |record, i|
-      resource = resources[i]
-      if id_field = resource.class.key.find {|p| p.serial?}
-        normalized_value = normalize_id_value(resource.class, id_field, record.id)
-        id_field.set!(resource, normalized_value)
-      end
-    end
+    result = connection.create(resources)
+    result.size == resources.size
 
-    result.size
-
-  rescue Connection::SOAPError => e
-    handle_server_outage(e)
+#  rescue Connection::SOAPError => e
+#    handle_server_outage(e)
   end
 
   def update(attributes, collection)
-    query = collection.query
-    arr   = collection.map { |obj| make_salesforce_obj(query, attributes) }
-
-    connection.update(arr).size
-
+    connection.update(attributes, collection).size == collection.size
   rescue Connection::SOAPError => e
     handle_server_outage(e)
   end
+  
 
   def delete(collection)
-    query = collection.query
-    keys  = collection.map { |r| r.key }.flatten.uniq
-
-    connection.delete(keys).size
+    connection.delete(collection).size == collection.size
 
   rescue Connection::SOAPError => e
     handle_server_outage(e)
@@ -90,19 +68,23 @@ class SalesforceAdapter
   def read(query)
     properties = query.fields
     repository = query.repository
+    model = query.model
+    storage_name = model.storage_name(repository.name)
 
     response = execute_select(query)
-    return [] unless response.records
-
-    rows = response.records.inject([]) do |results, record|
-      results << properties.inject({}) do |result, property|
-        meth = connection.field_name_for(property.model.storage_name(repository.name), property.field)
-        result[property] = normalize_id_value(query.model, property, record.send(meth))
-        result
+    return [] unless response[:records]
+    
+    response_records = [response[:records]].flatten
+    
+    rows = response_records.inject([]) do |records, record|
+                 
+      records << properties.inject({}) do |row, property|
+        field_name = connection.field_name_for(storage_name, property.field).to_s.to_sym
+        row[property.field] = property.typecast(record[field_name.downcase])
+        row
       end
     end
-
-    query.model.load(rows, query)
+    model.load(rows, query)
   end
 
   # http://www.salesforce.com/us/developer/docs/api90/Content/sforce_api_calls_soql.htm
@@ -134,7 +116,7 @@ class SalesforceAdapter
       end
     end.join(", ")
 
-    sql = "SELECT #{fields} from #{query.model.storage_name(repository.name)}"
+    sql = "SELECT #{fields} FROM #{query.model.storage_name(repository.name)}"
     sql << " WHERE (#{conditions})" unless conditions.empty?
     sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
     sql << " LIMIT #{query.limit}" if query.limit
@@ -144,29 +126,6 @@ class SalesforceAdapter
     connection.query(sql)
   end
 
-  def make_salesforce_obj(from, with_attrs)
-    klass_name = from.model.storage_name(from.repository.name)
-    values     = {}
-
-    # FIXME: query.conditions is potentially a tree now
-    if from.is_a?(::DataMapper::Query)
-      key_value    = from.conditions.find { |c| c.subject.key? }.value
-      values["id"] = normalize_id_value(from.model, from.model.properties[:id], key_value)
-    end
-
-    with_attrs.each do |property, value|
-      next if property.serial? || property.key? and value.nil?
-      values[property.field] = normalize_id_value(from.model, property, value)
-    end
-
-    connection.make_object(klass_name, values)
-  end
-
-  def normalize_id_value(klass, property, value)
-    return nil unless value
-    properties = Array(klass.send(:salesforce_id_properties)).map { |p| p.to_sym } rescue []
-    return properties.include?(property.name) ? value[0..14] : value
-  end
 end
 
 
