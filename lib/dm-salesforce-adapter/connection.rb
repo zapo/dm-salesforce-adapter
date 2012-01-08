@@ -27,11 +27,18 @@ class SalesforceAdapter
 
             att_names = _data[:attributes].map {|a| a.first.name} | [:Id]
             
-            attributes = resource.attributes.find_all {|name, value| att_names.include?(name)}
+            attributes = case
+            when att_names.empty?
+              resource.attributes.find_all {|name, value| att_names.include?(name)}
+            else
+              resource.attributes
+            end
+            
             attributes.each do |field, value|
               field = connection.field_name_for(storage_name, field).to_sym
-              if value.nil? or value.empty?
-                xml.fieldsToNull(field)
+                            
+              if value.nil? or value == ""
+                xml.fieldsToNull(field) unless field == :Id
               else
                 xml.__send__(field, value.to_s)
               end
