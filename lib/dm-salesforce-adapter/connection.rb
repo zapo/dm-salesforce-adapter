@@ -33,14 +33,20 @@ class SalesforceAdapter
             else
               resource.attributes
             end
-            
+                        
             attributes.each do |field, value|
-              field = connection.field_name_for(storage_name, field).to_sym
+              
+              property = resource.class.properties.find {|p| p.name == field.to_sym}
+              field = connection.field_for(storage_name, field)
                             
-              if value.nil? or value == ""
-                xml.fieldsToNull(field) unless field == :Id
+              next unless field && property
+              
+              field_name = field[:name].to_sym
+              
+              if (value.nil? || value.to_s.empty?) && field[:nillable]
+                xml.fieldsToNull(field_name.to_s) unless field_name == :Id
               else
-                xml.__send__(field, value.to_s)
+                xml.__send__(field_name, property.typecast(value))
               end
             end
           end
@@ -78,6 +84,9 @@ class SalesforceAdapter
     end
     
     def sf_id_for resource
+      
+      return resource[:Id] if resource.respond_to? :Id
+      
       query_string = "SELECT Id FROM #{resource.class.storage_name(resource.repository.name)}"
       query_string << " WHERE #{resource.class.key.map {|k| "#{k.field} = #{k.get(resource)}"}.join(') AND (')} LIMIT 1"
 
@@ -88,18 +97,23 @@ class SalesforceAdapter
     end
 
     def field_name_for(klass_name, column)
+      field = field_for(klass_name, column)
+      field[:name] if field
+    end
+    
+    
+    def field_for(klass_name, column)
       fields = [column, Inflector.camelize(column.to_s), "#{Inflector.camelize(column.to_s)}__c", "#{column}__c".downcase]
       options = /^(#{fields.join("|")})$/i
       
       field = description(klass_name).find {|col| col[:name].to_s.match(options) }
       
-      return field[:name] if field
+      return field
       
       raise FieldNotFound,
         "You specified #{column} as a field, but none of the expected field names exist: #{fields.join(", ")}. " \
         "Either manually specify the field name with :field, or check to make sure you have " \
         "provided a correct field name."
-      
     end
     
     
@@ -138,15 +152,16 @@ class SalesforceAdapter
         soap.header = session_headers
         soap.body =  {'wsdl:sObjectType' => klass_name}
       end
-
-      result.to_hash[:describe_s_object_response][:result][:fields].inject([]) do |fields, f|
+      
+      result.to_hash[:describe_s_object_response][:result][:fields].each do |f|
 
         type = f[:type].to_s.to_sym
         type = (field_map[type] if field_map.has_key?(type)) || ::DataMapper::Property::String
 
-        fields << {:name => f[:name], :type => type}
-        fields
+        f[:dmtype] = type
       end
+      
+      result.to_hash[:describe_s_object_response][:result][:fields]
     end
     
     def prepare_resources resources

@@ -21,6 +21,8 @@ Savon.configure do |config|
   config.log_level = :info
 end
 
+HTTPI.adapter = :httpclient
+
 
 # For convenience (WRT the examples)
 module DataMapper::Salesforce
