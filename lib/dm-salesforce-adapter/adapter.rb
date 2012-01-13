@@ -74,6 +74,8 @@ class SalesforceAdapter
     response = execute_select(query)
     return [] unless response[:records]
     
+    p response[:size]
+    
     response_records = [response[:records]].flatten
     
     rows = response_records.inject([]) do |records, record|
@@ -115,7 +117,7 @@ class SalesforceAdapter
         raise ArgumentError, "Unknown query field #{f.class}: #{f.inspect}"
       end
     end.join(", ")
-
+    
     sql = "SELECT #{fields} FROM #{query.model.storage_name(repository.name)}"
     sql << " WHERE (#{conditions})" unless conditions.empty?
     sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
@@ -125,7 +127,6 @@ class SalesforceAdapter
 
     connection.query(sql)
   end
-
 end
 
 
