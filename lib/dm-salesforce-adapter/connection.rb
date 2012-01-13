@@ -134,6 +134,15 @@ class SalesforceAdapter
       result.to_hash[:query_response][:result]
     end
     
+    def query_more(locator)
+      result = driver.request :query_more do
+        soap.header = session_headers
+        soap.body = {:queryLocator => locator}
+      end
+      
+      result.to_hash[:query_more_response][:result]
+    end
+    
     def describe(klass_name)
       field_map = {
         :id                                    => ::DataMapper::Property::Serial,

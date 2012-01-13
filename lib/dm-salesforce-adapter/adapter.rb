@@ -66,33 +66,25 @@ class SalesforceAdapter
   # an aggregate result, thus the response from execute_select() is processed
   # differently depending on invocation (read vs. aggregate).
   def read(query)
-    rows = []
-    size = 0
-    begin
-      properties = query.fields
-      repository = query.repository
-      model = query.model
-      storage_name = model.storage_name(repository.name)
+    
+    properties = query.fields
+    repository = query.repository
+    model = query.model
+    storage_name = model.storage_name(repository.name)
 
-      response = execute_select(query)
-      return [] unless response[:records]
-      
-      size = response[:size] if size == 0
+    response = execute_select(query)
+    return [] unless response[:records]
 
-      response_records = [response[:records]].flatten
-      
-      query.offset = rows.length if rows.length > 0
-      query.limit  = response_records.length if response_records.length > 0
+    response_records = [response[:records]].flatten
 
-      rows += response_records.inject([]) do |records, record|
+    rows = response_records.inject([]) do |records, record|
 
-        records << properties.inject({}) do |row, property|
-          field_name = connection.field_name_for(storage_name, property.field).to_s.to_sym
-          row[property.field] = property.typecast(record[field_name.downcase])
-          row
-        end
+      records << properties.inject({}) do |row, property|
+        field_name = connection.field_name_for(storage_name, property.field).to_s.to_sym
+        row[property.field] = property.typecast(record[field_name.downcase])
+        row
       end
-    end while(rows.length < size)
+    end
     
     model.load(rows, query)
   end
@@ -112,6 +104,7 @@ class SalesforceAdapter
 
   private
   def execute_select(query)
+        
     repository = query.repository
     conditions = query.conditions.map {|c| conditions_statement(c, repository)}.compact.join(") AND (")
 
@@ -131,9 +124,20 @@ class SalesforceAdapter
     sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
     sql << " LIMIT #{query.limit}" if query.limit
 
-    DataMapper.logger.debug sql if DataMapper.logger
+    result = connection.query(sql)
+    done = result[:done]
+    locator = result[:query_locator]
+    
+    while(!done)
 
-    connection.query(sql)
+      more_result = connection.query_more(locator)
+      done        = more_result[:done]
+      locator     = more_result[:query_locator]
+      
+      result[:records] += more_result[:records]
+    end
+    
+    result
   end
 end
 
