@@ -66,26 +66,34 @@ class SalesforceAdapter
   # an aggregate result, thus the response from execute_select() is processed
   # differently depending on invocation (read vs. aggregate).
   def read(query)
-    properties = query.fields
-    repository = query.repository
-    model = query.model
-    storage_name = model.storage_name(repository.name)
+    rows = []
+    size = 0
+    begin
+      properties = query.fields
+      repository = query.repository
+      model = query.model
+      storage_name = model.storage_name(repository.name)
 
-    response = execute_select(query)
-    return [] unless response[:records]
-    
-    p response[:size]
-    
-    response_records = [response[:records]].flatten
-    
-    rows = response_records.inject([]) do |records, record|
-                 
-      records << properties.inject({}) do |row, property|
-        field_name = connection.field_name_for(storage_name, property.field).to_s.to_sym
-        row[property.field] = property.typecast(record[field_name.downcase])
-        row
+      response = execute_select(query)
+      return [] unless response[:records]
+      
+      size = response[:size] if size == 0
+
+      response_records = [response[:records]].flatten
+      
+      query.offset = rows.length if rows.length > 0
+      query.limit  = response_records.length if response_records.length > 0
+
+      rows += response_records.inject([]) do |records, record|
+
+        records << properties.inject({}) do |row, property|
+          field_name = connection.field_name_for(storage_name, property.field).to_s.to_sym
+          row[property.field] = property.typecast(record[field_name.downcase])
+          row
+        end
       end
-    end
+    end while(rows.length < size)
+    
     model.load(rows, query)
   end
 
