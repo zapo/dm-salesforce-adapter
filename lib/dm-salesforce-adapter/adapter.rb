@@ -140,5 +140,3 @@ class SalesforceAdapter
     result
   end
 end
-
-
