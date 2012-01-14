@@ -124,6 +124,8 @@ class SalesforceAdapter
     sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
     sql << " LIMIT #{query.limit}" if query.limit
 
+    DataMapper.logger.info sql
+    
     result = connection.query(sql)
     done = result[:done]
     locator = result[:query_locator]
