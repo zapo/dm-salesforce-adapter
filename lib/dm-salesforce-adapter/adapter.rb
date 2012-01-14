@@ -94,16 +94,10 @@ class SalesforceAdapter
     response = execute_select(query)
     result = []
     
-    i = 0
-    query.fields.each do |f|
-      if f.target == :all && f.operator == :count
-        result << response[:size]
-      else
-        result << response[:"expr#{i}"]
-        i += 1
-      end
+    query.fields.each_with_index do |f, i|
+      value = response[:records][:"expr#{i}"]
+      result << ((value.include? '.') ? value.to_f : value.to_i)
     end
-
     result
   end
 
@@ -118,7 +112,8 @@ class SalesforceAdapter
       when DataMapper::Property
         f.field
       when DataMapper::Query::Operator
-        %{#{f.operator}()}
+        target = f.target != :all ? f.target.field : 'Id'
+        %{#{f.operator}(#{target})}
       else
         raise ArgumentError, "Unknown query field #{f.class}: #{f.inspect}"
       end
@@ -129,6 +124,8 @@ class SalesforceAdapter
     sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
     sql << " LIMIT #{query.limit}" if query.limit
 
+    DataMapper.logger.info(sql)
+    
     result = connection.query(sql)
     done = result[:done]
     locator = result[:query_locator]
