@@ -99,7 +99,7 @@ class SalesforceAdapter
       end
     end
 
-    [ execute_select(query).size ]
+    [ execute_select(query)[:records].size ]
   end
 
   private
