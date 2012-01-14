@@ -89,17 +89,22 @@ class SalesforceAdapter
     model.load(rows, query)
   end
 
-  # http://www.salesforce.com/us/developer/docs/api90/Content/sforce_api_calls_soql.htm
-  # SOQL doesn't support anything but count(), so we catch it here and interpret
-  # the result.  Requires 'dm-aggregates' to be loaded.
   def aggregate(query)
+    
+    response = execute_select(query)
+    result = []
+    
+    i = 0
     query.fields.each do |f|
-      unless f.target == :all && f.operator == :count
-        raise ArgumentError, %{Aggregate function #{f.operator} not supported in SOQL}
+      if f.target == :all && f.operator == :count
+        result << response[:size]
+      else
+        result << response[:"expr#{i}"]
+        i += 1
       end
     end
 
-    [ execute_select(query)[:size] ]
+    result
   end
 
   private
@@ -124,8 +129,6 @@ class SalesforceAdapter
     sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
     sql << " LIMIT #{query.limit}" if query.limit
 
-    DataMapper.logger.info sql
-    
     result = connection.query(sql)
     done = result[:done]
     locator = result[:query_locator]
@@ -142,3 +145,5 @@ class SalesforceAdapter
     result
   end
 end
+
+
