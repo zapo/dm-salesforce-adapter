@@ -13,12 +13,12 @@ Gem::Specification.new do |s|
   s.email            = "jpr5@serv.io"
   s.homepage         = "http://github.com/cloudcrowd/dm-salesforce-adapter"
 
-  s.add_dependency "data_objects",   "~> 0.10.6"
-  s.add_dependency "dm-core",        "~> 1.1.0"
-  s.add_dependency "dm-validations", "~> 1.1.0"
-  s.add_dependency "dm-types",       "~> 1.1.0"
-  s.add_dependency 'savon',          "~> 1.0.0"
-  s.add_dependency 'httpclient',     "~> 2.2.4"
+  s.add_dependency "data_objects"
+  s.add_dependency "dm-core"
+  s.add_dependency "dm-validations"
+  s.add_dependency "dm-types"
+  s.add_dependency 'savon'
+  s.add_dependency 'httpclient'
 
   s.require_path = 'lib'
   s.files        = %w(LICENSE README.markdown Rakefile) + Dir.glob("lib/**/*")
