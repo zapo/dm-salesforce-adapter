@@ -201,7 +201,7 @@ class SalesforceAdapter
         if r.respond_to?(:Id)
           r.Id
         else
-          connection.sf_id_for r
+          sf_id_for r
         end
 
       end.flatten.uniq
