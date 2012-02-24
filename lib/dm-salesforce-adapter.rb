@@ -8,10 +8,10 @@ class SalesforceAdapter < ::DataMapper::Adapters::AbstractAdapter
 end
 
 require 'savon'
-
 require 'dm-salesforce-adapter/resource'
-require 'dm-salesforce-adapter/connection'
 require 'dm-salesforce-adapter/connection/errors'
+require 'dm-salesforce-adapter/connection/builders'
+require 'dm-salesforce-adapter/connection'
 require 'dm-salesforce-adapter/sql'
 require 'dm-salesforce-adapter/version'
 require 'dm-salesforce-adapter/adapter'
@@ -19,6 +19,7 @@ require 'dm-salesforce-adapter/property'
 
 Savon.configure do |config|
   config.log_level = :info
+  config.log       = DataMapper.logger.dup
 end
 
 HTTPI.adapter = :httpclient

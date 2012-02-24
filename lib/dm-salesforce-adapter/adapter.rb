@@ -8,7 +8,7 @@ class SalesforceAdapter
     end
     
     @field_naming_convention = proc do |property|
-      connection.field_name_for(property.model.storage_name(name), property.name.to_s)
+      connection.field_name_for(property.model, property.field.to_s)
     end
   end
 
@@ -16,61 +16,24 @@ class SalesforceAdapter
     @connection ||= Connection.new(options["username"], options["password"], options["path"])
   end
 
-  # FIXME: DM Adapters customarily throw exceptions when they experience errors,
-  # otherwise failed operations (e.g. Resource#save) still return true and thus
-  # confuse the caller.
-  #
-  # Someone needs to make a decision about legacy support and the consequences
-  # of changing the behaviour from broken-but-typical to
-  # correct-but-maybe-unexpected.  Maybe a config file option about whether to
-  # raise exceptions or for the user to always check Model#valid? +
-  # Model#salesforce_errors?
-  #
-  # Needs to be applied to all CRUD operations.
   def create(resources)
-
     result = connection.create(resources)
     result.size == resources.size
-
-#  rescue Connection::SOAPError => e
-#    handle_server_outage(e)
   end
 
   def update(attributes, collection)
     connection.update(attributes, collection).size == collection.size
-  rescue Connection::SOAPError => e
-    handle_server_outage(e)
   end
   
 
   def delete(collection)
     connection.delete(collection).size == collection.size
-
-  rescue Connection::SOAPError => e
-    handle_server_outage(e)
   end
 
-  def handle_server_outage(error)
-    if error.server_unavailable?
-      raise Connection::ServerUnavailable, "The salesforce server is currently unavailable"
-    else
-      raise error
-    end
-  end
-
-  # Reading responses back from SELECTS:
-  #   In the typical case, response.size reflects the # of records returned.
-  #   In the aggregation case, response.size reflects the count.
-  #
-  # Interpretation of this field requires knowledge of whether we are expecting
-  # an aggregate result, thus the response from execute_select() is processed
-  # differently depending on invocation (read vs. aggregate).
   def read(query)
     
     properties = query.fields
-    repository = query.repository
     model = query.model
-    storage_name = model.storage_name(repository.name)
 
     response = execute_select(query)
     return [] unless response[:records]
@@ -80,12 +43,11 @@ class SalesforceAdapter
     rows = response_records.inject([]) do |records, record|
 
       records << properties.inject({}) do |row, property|
-        field_name = connection.field_name_for(storage_name, property.field).to_s.to_sym
-        row[property.field] = property.typecast(record[field_name.downcase])
+        field_name = connection.field_name_for(query.model, property.field).to_s.underscore.to_sym
+        row[property.field] = property.typecast(record[field_name])
         row
       end
     end
-    
     model.load(rows, query)
   end
 
@@ -142,5 +104,3 @@ class SalesforceAdapter
     result
   end
 end
-
-

@@ -68,7 +68,7 @@ class SalesforceAdapter
     end
 
     def equality_operator(property, operand)
-      operand.nil? ? 'IS' : '='
+      '='
     end
 
     def include_operator(property, operand)

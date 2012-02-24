@@ -1,0 +1,6 @@
+require 'dm-salesforce-adapter/connection/builders/objects'
+require 'dm-salesforce-adapter/connection/builders/resources'
+require 'dm-salesforce-adapter/connection/builders/create_resources'
+require 'dm-salesforce-adapter/connection/builders/update_resources'
+require 'dm-salesforce-adapter/connection/builders/upsert_resources'
+require 'dm-salesforce-adapter/connection/builders/delete_resources'
