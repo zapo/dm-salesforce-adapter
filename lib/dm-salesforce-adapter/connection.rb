@@ -202,7 +202,7 @@ class SalesforceAdapter
       
       with_sf_limits_for resources do |res|
         res.each do |resource|
-          raise FieldNotFound.new('Id'), resource unless resource.respond_to? :Id
+          raise FieldNotFound.new('Id', resource) unless resource.respond_to? :Id
           resource[:Id] = sf_id_for(resource)
         end
         call_api(:update, UpdateError, "updating", &UpdateObjectsBuilder.new({:resources => res, :attributes => attributes}, self))
