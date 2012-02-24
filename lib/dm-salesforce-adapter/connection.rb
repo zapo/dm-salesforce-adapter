@@ -183,10 +183,8 @@ class SalesforceAdapter
     
     def with_sf_limits_for resources, &block
       result = []
-      if block
-        resources.each_slice(200).to_a do |res|
-          result << block.call(res)
-        end
+      resources.each_slice(200).to_a do |res|
+        result << block.call(res)
       end
       result.flatten
     end
