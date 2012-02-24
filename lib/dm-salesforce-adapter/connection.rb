@@ -180,31 +180,42 @@ class SalesforceAdapter
         description resource.class.storage_name(resource.repository.name)
       end
     end
+    
+    def with_sf_limits_for resources, &block
+      result = []
+      if block
+        resources.each_slice(200).to_a do |res|
+          result << block.call(res)
+        end
+      end
+      result.flatten
+    end
 
     def create(resources)
       prepare_resources(resources)
-      call_api(:create, CreateError, "creating", &UpdateObjectsBuilder.new({:resources => resources}, self))
+      
+      with_sf_limits_for resources do |res|
+        call_api(:create, CreateError, "creating", &UpdateObjectsBuilder.new({:resources => res}, self))
+      end
     end
 
     def update(attributes, resources)
       prepare_resources(resources)
       
-      resources.each do |resource|
-        raise FieldNotFound.new('Id'), resource unless resource.respond_to? :Id
-        resource[:Id] = sf_id_for(resource)
+      with_sf_limits_for resources do |res|
+        res.each do |resource|
+          raise FieldNotFound.new('Id'), resource unless resource.respond_to? :Id
+          resource[:Id] = sf_id_for(resource)
+        end
+        call_api(:update, UpdateError, "updating", &UpdateObjectsBuilder.new({:resources => res, :attributes => attributes}, self))
       end
-      
-      call_api(:update, UpdateError, "updating", &UpdateObjectsBuilder.new({:resources => resources, :attributes => attributes}, self))
     end
 
     def delete(collection)
-      
-      keys_array  = collection.map {|r| sf_id_for r }.flatten.uniq.each_slice(200).to_a
-      result = []
-      keys_array.each do |keys|
-        result << call_api(:delete, DeleteError, "deleting", &DeleteObjectsBuilder.new(keys, self))
+      with_sf_limits_for collection do |resources|
+        keys  = resources.map {|r| sf_id_for r }
+        call_api(:delete, DeleteError, "deleting", &DeleteObjectsBuilder.new(keys, self))
       end
-      result.flatten
     end
 
     private
