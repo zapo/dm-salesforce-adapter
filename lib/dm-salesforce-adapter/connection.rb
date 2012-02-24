@@ -84,9 +84,10 @@ class SalesforceAdapter
     end
     
     def sf_id_for resource
-      if !resource[:Id].nil? && !resource[:Id].empty?
-        return resource[:Id]
-      end
+
+      id_prop = resource.class.properties.find {|p| p.name == :Id}
+
+      return id_prop.get(resource) if id_prop
       
       query_string = "SELECT Id FROM #{resource.class.storage_name(resource.repository.name)}"
       query_string << " WHERE #{resource.class.key.map {|k| "#{k.field} = #{k.get(resource)}"}.join(') AND (')} LIMIT 1"
