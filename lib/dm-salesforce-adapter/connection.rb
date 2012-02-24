@@ -200,11 +200,11 @@ class SalesforceAdapter
     def delete(collection)
       
       keys_array  = collection.map {|r| sf_id_for r }.flatten.uniq.each_slice(200).to_a
-      
+      result = []
       keys_array.each do |keys|
-        call_api(:delete, DeleteError, "deleting", &DeleteObjectsBuilder.new(keys, self))
+        result << call_api(:delete, DeleteError, "deleting", &DeleteObjectsBuilder.new(keys, self))
       end
-      
+      result.flatten
     end
 
     private
