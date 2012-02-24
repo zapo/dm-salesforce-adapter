@@ -84,8 +84,9 @@ class SalesforceAdapter
     end
     
     def sf_id_for resource
-      
-      return resource[:Id] if resource.respond_to? :Id
+      if !resource[:Id].nil? && !resource[:Id].empty?
+        return resource[:Id]
+      end
       
       query_string = "SELECT Id FROM #{resource.class.storage_name(resource.repository.name)}"
       query_string << " WHERE #{resource.class.key.map {|k| "#{k.field} = #{k.get(resource)}"}.join(') AND (')} LIMIT 1"
@@ -189,7 +190,7 @@ class SalesforceAdapter
       
       resources.each do |resource|
         raise FieldNotFound.new('Id'), resource unless resource.respond_to? :Id
-        resource[:Id] = sf_id_for(resource) unless resource[:Id].nil? or resource[:Id].empty?
+        resource[:Id] = sf_id_for(resource)
       end
       
       call_api(:update, UpdateError, "updating", &UpdateObjectsBuilder.new({:resources => resources, :attributes => attributes}, self))
@@ -197,15 +198,7 @@ class SalesforceAdapter
 
     def delete(collection)
       
-      keys  = collection.map do |r| 
-        if r.respond_to?(:Id)
-          r.Id
-        else
-          sf_id_for r
-        end
-
-      end.flatten.uniq
-      
+      keys  = collection.map {|r| sf_id_for r }.flatten.uniq
       call_api(:delete, DeleteError, "deleting", &DeleteObjectsBuilder.new(keys, self))
     end
 
