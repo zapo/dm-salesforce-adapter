@@ -42,7 +42,6 @@ class SalesforceAdapter
         statement << " FROM     #{from}"
         statement << " WHERE    #{conditions}"  unless conditions.to_s.empty?
         statement << " ORDER BY #{order}"       unless order.empty?
-        statement << ";"
       end
 
       statement
