@@ -1,6 +1,4 @@
 class SalesforceAdapter
-  include SQL
-
   def initialize(name, uri_or_options)
     super
     @resource_naming_convention = proc do |value|
@@ -66,29 +64,10 @@ class SalesforceAdapter
   private
   def execute_select(query)
         
-    repository = query.repository
-    conditions = query.conditions.map {|c| conditions_statement(c, repository)}.compact.join(") AND (")
-
-    fields = query.fields.map do |f|
-      case f
-      when DataMapper::Property
-        f.field
-      when DataMapper::Query::Operator
-        target = f.target != :all ? f.target.field : 'Id'
-        %{#{f.operator}(#{target})}
-      else
-        raise ArgumentError, "Unknown query field #{f.class}: #{f.inspect}"
-      end
-    end.join(", ")
+    statement = SQLQuery.new(query, :select).to_s
+    DataMapper.logger.info(statement)
     
-    sql = "SELECT #{fields} FROM #{query.model.storage_name(repository.name)}"
-    sql << " WHERE (#{conditions})" unless conditions.empty?
-    sql << " ORDER BY #{order(query.order[0])}" unless query.order.nil? or query.order.empty?
-    sql << " LIMIT #{query.limit}" if query.limit
-
-    DataMapper.logger.info(sql)
-    
-    result = connection.query(sql)
+    result = connection.query(statement)
     done = result[:done]
     locator = result[:query_locator]
     
