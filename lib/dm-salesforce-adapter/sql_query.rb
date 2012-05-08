@@ -104,7 +104,7 @@ class SalesforceAdapter
     end
     
     def quote_name(name)
-      "\"#{name.gsub('"', '""')}\""
+      name
     end
 
     def storage_name(rel, repository)
