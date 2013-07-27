@@ -73,7 +73,7 @@ class SalesforceAdapter
     end
 
     def query(string)
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_headers => session_headers)).call :query do
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :query do
         message(:queryString => string)
       end
 
@@ -81,7 +81,7 @@ class SalesforceAdapter
     end
 
     def query_more(locator)
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_headers => session_headers)).call :query_more do
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :query_more do
         message(:queryLocator => locator)
       end
 
@@ -102,7 +102,7 @@ class SalesforceAdapter
         :double                                => ::DataMapper::Property::Decimal
       }
 
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_headers => session_headers)).call :describe_s_object do
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :describe_s_object do
         message('sObjectType' => klass_name)
       end
 
@@ -230,7 +230,7 @@ class SalesforceAdapter
         body = body.call(Builder::XmlMarkup.new).to_s
       end
 
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_headers => session_headers)).call method.to_sym do
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call method.to_sym do
         message(body)
       end
 
