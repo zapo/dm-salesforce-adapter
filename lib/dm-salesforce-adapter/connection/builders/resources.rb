@@ -25,7 +25,7 @@ class ResourcesBuilder < ObjectsBuilder
         field = resource.class.relationships.each do |rel|
 
           next unless rel.is_a?(DataMapper::Associations::ManyToOne::Relationship)
-          child_key = rel.child_key.find {|k| k.name == f.to_sym}
+          child_key = rel.child_key.find {|k| k.field.to_sym == f.to_sym}
           break connection.field_for(resource.class, child_key.field) if child_key
         end
       end
