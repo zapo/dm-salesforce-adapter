@@ -93,7 +93,7 @@ class SalesforceAdapter
     end
 
     def query_more(locator)
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :query_more do
+      result = client.call :query_more do
         message(:queryLocator => locator)
       end
 
@@ -114,7 +114,7 @@ class SalesforceAdapter
         :double                                => ::DataMapper::Property::Decimal
       }
 
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :describe_s_object do
+      result = client.call :describe_s_object do
         message('wsdl:sObjectType' => klass_name)
       end
 
