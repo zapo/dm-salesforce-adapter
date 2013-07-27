@@ -16,7 +16,7 @@ class UpsertResourcesBuilder < ResourcesBuilder
 
           next unless field && property
 
-          field_name = property.field.to_sym
+          field_name = field[:name].to_sym
 
           if value.nil? || value.to_s.empty?
 

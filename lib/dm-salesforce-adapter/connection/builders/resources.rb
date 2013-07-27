@@ -8,9 +8,9 @@ class ResourcesBuilder < ObjectsBuilder
     resource = resources.first || raise('No resources given')
 
     if !data[:attributes] || data[:attributes].empty?
-      att_names = resource.class.properties.map(&:name)
+      att_names = resource.class.properties.map(&:field)
     else
-      att_names = data[:attributes].map {|a| a.first.name}
+      att_names = data[:attributes].map {|a| a.first.field}
     end
 
     att_names |= [:Id]
