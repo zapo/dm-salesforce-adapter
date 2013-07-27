@@ -31,7 +31,7 @@ class ResourcesBuilder < ObjectsBuilder
       end
 
       raise "Cant find sf field named '#{f}'" unless field
-      res[field] = resource.class.properties.find {|p| p.field == f}
+      res[field] = resource.class.properties.find {|p| p.field.to_sym == f.to_sym}
       res
     end
   end
