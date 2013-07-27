@@ -17,10 +17,7 @@ require 'dm-salesforce-adapter/version'
 require 'dm-salesforce-adapter/adapter'
 require 'dm-salesforce-adapter/property'
 
-Savon.configure do |config|
-  config.log_level = :info
-  config.log       = DataMapper.logger.dup
-end
+Savon.client(:logger => DataMapper.logger.dup, :log_level => :info)
 
 HTTPI.adapter = :httpclient
 
