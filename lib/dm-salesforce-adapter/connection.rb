@@ -68,19 +68,20 @@ class SalesforceAdapter
       {"#{ns}:LoginScopeHeader" => {"#{ns}:organizationId" => @organization_id}}
     end
 
+    def client
+    end
+
     def query(string)
-      result = driver.request :query do
-        soap.header = session_headers
-        soap.body = {:queryString => string}
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :headers => session_headers)).call :query do
+        message(:queryString => string)
       end
 
       result.to_hash[:query_response][:result]
     end
 
     def query_more(locator)
-      result = driver.request :query_more do
-        soap.header = session_headers
-        soap.body = {:queryLocator => locator}
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :headers => session_headers)).call :query_more do
+        message(:queryLocator => locator)
       end
 
       result.to_hash[:query_more_response][:result]
@@ -100,9 +101,8 @@ class SalesforceAdapter
         :double                                => ::DataMapper::Property::Decimal
       }
 
-      result = driver.request :wsdl, :describe_s_object do
-        soap.header = session_headers
-        soap.body =  {'wsdl:sObjectType' => klass_name}
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :headers => session_headers, :namespace => :wsdl)).call :describe_s_object do
+        message('wsdl:sObjectType' => klass_name)
       end
 
       fields = result.to_hash[:describe_s_object_response][:result][:fields]
@@ -218,8 +218,6 @@ class SalesforceAdapter
       response.each do |k, v|
         instance_variable_set("@#{k}", v)
       end
-
-      driver
     end
 
     def call_api(method, args = nil, &block)
