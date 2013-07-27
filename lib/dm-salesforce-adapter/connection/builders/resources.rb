@@ -19,6 +19,8 @@ class ResourcesBuilder < ObjectsBuilder
 
       field = connection.field_for(resource.class, f)
 
+      DataMapper.logger.info field
+
       unless field
         field = resource.class.relationships.each do |rel|
 
