@@ -8,9 +8,6 @@ class SalesforceAdapter
     def initialize(username, password, wsdl_path, organization_id = nil)
       @username, @password, @organization_id = URI.unescape(username), password, organization_id
 
-      @driver = Savon.client(:logger => DataMapper.logger.dup, :log_level => :info) do
-        wsdl wsdl_path
-      end
 
       @descriptions = {}
       login
@@ -201,12 +198,18 @@ class SalesforceAdapter
     end
 
     private
-    def driver; @driver; end
+    def savon_defaults
+      @savon_defaults ||= {
+        :logger    => DataMapper.logger.dup,
+        :log_level => :info,
+        :wsdl      => wsdl_path
+      }
+    end
 
     def login
       username, password = @username, @password
 
-      result = driver.call :login do
+      result = Savon.client(savon_defaults).call :login do
         message(:username => username, :password => password)
       end
 
@@ -215,7 +218,6 @@ class SalesforceAdapter
         instance_variable_set("@#{k}", v)
       end
 
-      driver.wsdl.endpoint = @server_url
       driver
     end
 
@@ -227,9 +229,8 @@ class SalesforceAdapter
         body = body.call(Builder::XmlMarkup.new).to_s
       end
 
-      result = driver.request method.to_sym do
-        soap.header = session_headers
-        soap.body = body
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :headers => session_headers)).call method.to_sym do
+        message(body)
       end
 
       hash_result = result.to_hash
