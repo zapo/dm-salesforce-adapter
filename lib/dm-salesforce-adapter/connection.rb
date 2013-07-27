@@ -10,8 +10,9 @@ class SalesforceAdapter
 
 
       @descriptions = {}
-      login
+      @wsdl_path = wsdl_path
     end
+
 
     def description model
       storage_name = storage_name(model)
@@ -262,6 +263,10 @@ class SalesforceAdapter
        end
 
        raise Errors.const_get(status_code).new(method, message)
+    end
+
+    def wsdl_path
+      @wsdl_path
     end
 
     def with_reconnection(&block)
