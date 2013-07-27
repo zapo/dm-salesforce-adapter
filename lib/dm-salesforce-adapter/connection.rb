@@ -8,7 +8,7 @@ class SalesforceAdapter
     def initialize(username, password, wsdl_path, organization_id = nil)
       @username, @password, @organization_id = URI.unescape(username), password, organization_id
 
-      @driver = Savon.client do
+      @driver = Savon.client(:logger => DataMapper.logger.dup, :log_level => :info) do
         wsdl wsdl_path
       end
 
