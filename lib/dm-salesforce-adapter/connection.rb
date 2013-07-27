@@ -60,17 +60,28 @@ class SalesforceAdapter
       return field
     end
 
-
-    def session_headers ns = 'wsdl'
-      {"#{ns}:SessionHeader" => {"#{ns}:sessionId" => @session_id}}
+    def namespace_id
+      'wsdl'
     end
 
-    def login_scope_headers ns = 'wsdl'
-      {"#{ns}:LoginScopeHeader" => {"#{ns}:organizationId" => @organization_id}}
+    def session_headers
+      {"#{namespace_id}:SessionHeader" => {"#{namespace_id}:sessionId" => @session_id}}
+    end
+
+    def login_scope_headers
+      {"#{namespace_id}:LoginScopeHeader" => {"#{namespace_id}:organizationId" => @organization_id}}
+    end
+
+    def login_client
+      @login_client ||= Savon.client(savon_defaults)
+    end
+
+    def client
+      @client ||= Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers))
     end
 
     def query(string)
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :query do
+      result = client.call :query do
         message(:queryString => string)
       end
 
@@ -202,14 +213,13 @@ class SalesforceAdapter
         :logger    => DataMapper.logger.dup,
         :log_level => :info,
         :wsdl      => wsdl_path,
-        :namespace => :wsdl
       }
     end
 
     def login
       username, password = @username, @password
 
-      result = Savon.client(savon_defaults).call :login do
+      result = login_client.call :login do
         message(:username => username, :password => password)
       end
 
@@ -228,7 +238,7 @@ class SalesforceAdapter
         body = body.call(Builder::XmlMarkup.new).to_s
       end
 
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call method.to_sym do
+      result = client.call method.to_sym do
         message(body)
       end
 
