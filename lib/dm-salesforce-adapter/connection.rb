@@ -11,6 +11,7 @@ class SalesforceAdapter
 
       @descriptions = {}
       @wsdl_path = wsdl_path
+      login
     end
 
 
