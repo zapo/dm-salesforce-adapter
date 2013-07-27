@@ -77,7 +77,11 @@ class SalesforceAdapter
     end
 
     def client
-      @client ||= Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers))
+      @client ||= Savon.client(savon_defaults.merge(
+        :endpoint => @server_url,
+        :soap_header => session_headers,
+        :namespace_identifier => 'wsdl'
+      ))
     end
 
     def query(string)
