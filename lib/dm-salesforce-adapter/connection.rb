@@ -61,12 +61,12 @@ class SalesforceAdapter
     end
 
 
-    def session_headers
-      {"SessionHeader" => {"sessionId" => @session_id}}
+    def session_headers ns = 'wsdl'
+      {"#{ns}:SessionHeader" => {"#{ns}:sessionId" => @session_id}}
     end
 
-    def login_scope_headers
-      {"LoginScopeHeader" => {"organizationId" => @organization_id}}
+    def login_scope_headers ns = 'wsdl'
+      {"#{ns}:LoginScopeHeader" => {"#{ns}:organizationId" => @organization_id}}
     end
 
     def client
@@ -102,8 +102,8 @@ class SalesforceAdapter
         :double                                => ::DataMapper::Property::Decimal
       }
 
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :describe_s_object do
-        message('sObjectType' => klass_name)
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers, :namespace => :wsdl)).call :describe_s_object do
+        message('wsdl:sObjectType' => klass_name)
       end
 
       fields = result.to_hash[:describe_s_object_response][:result][:fields]
