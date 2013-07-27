@@ -11,7 +11,7 @@ class CreateResourcesBuilder < ResourcesBuilder
           next unless field && property
           value = property.get(resource)
 
-          field_name = field[:name].to_sym
+          field_name = property.field
 
           next if field_name == :Id || !field[:createable]
 
