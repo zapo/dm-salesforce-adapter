@@ -266,7 +266,7 @@ class SalesforceAdapter
           raise Errors.const_get(status_code).new(method, "#{e[:message]}")
         end
       end
-    rescue Savon::SOAP::Fault => soap_fault
+    rescue Savon::SOAPFault => soap_fault
        message = soap_fault.message
        status_code = soap_fault.class.name.split(':').last.underscore.classify
 
