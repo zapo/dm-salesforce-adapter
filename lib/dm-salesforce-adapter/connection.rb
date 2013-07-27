@@ -215,6 +215,7 @@ class SalesforceAdapter
       end
 
       response = result.to_hash[:login_response][:result] || {}
+      DataMapper.logger.info response
       response.each do |k, v|
         instance_variable_set("@#{k}", v)
       end
@@ -265,10 +266,6 @@ class SalesforceAdapter
 
     def wsdl_path
       @wsdl_path
-    end
-
-    def with_reconnection(&block)
-      yield
     end
   end
 end
