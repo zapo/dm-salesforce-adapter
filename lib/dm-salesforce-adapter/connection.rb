@@ -69,9 +69,6 @@ class SalesforceAdapter
       {"#{ns}:LoginScopeHeader" => {"#{ns}:organizationId" => @organization_id}}
     end
 
-    def client
-    end
-
     def query(string)
       result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :query do
         message(:queryString => string)
@@ -102,7 +99,7 @@ class SalesforceAdapter
         :double                                => ::DataMapper::Property::Decimal
       }
 
-      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers, :namespace => :wsdl)).call :describe_s_object do
+      result = Savon.client(savon_defaults.merge(:endpoint => @server_url, :soap_header => session_headers)).call :describe_s_object do
         message('wsdl:sObjectType' => klass_name)
       end
 
@@ -204,7 +201,8 @@ class SalesforceAdapter
       @savon_defaults ||= {
         :logger    => DataMapper.logger.dup,
         :log_level => :info,
-        :wsdl      => wsdl_path
+        :wsdl      => wsdl_path,
+        :namespace => :wsdl
       }
     end
 
