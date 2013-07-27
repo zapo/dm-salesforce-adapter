@@ -207,7 +207,7 @@ class SalesforceAdapter
       username, password = @username, @password
 
       result = driver.call :login do
-        soap.body = {:username => username, :password => password}
+        message(:username => username, :password => password)
       end
 
       response = result.to_hash[:login_response][:result] || {}
