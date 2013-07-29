@@ -242,11 +242,15 @@ class SalesforceAdapter
         body = body.call(Builder::XmlMarkup.new).to_s
       end
 
+      DataMapper.logger.info body
+
       result = client.call method.to_sym do
         message(body)
       end
 
       hash_result = result.to_hash
+      DataMapper.logger.info hash_result
+
       response = hash_result["#{method}_response".to_sym]
       response = [response[:result]].flatten if response && response[:result]
 
