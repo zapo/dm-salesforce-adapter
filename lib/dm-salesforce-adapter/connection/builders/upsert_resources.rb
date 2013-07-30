@@ -12,7 +12,11 @@ class UpsertResourcesBuilder < ResourcesBuilder
       xml.sObjects(:'xsi:type' => storage_name_for(resource)) do
 
         attributes.each do |field, property|
-          value = property.get(resource)
+          value = data[:attributes][property]
+
+          if property.name == :Id
+            value = resource[:Id]
+          end
 
           next unless field && property
 

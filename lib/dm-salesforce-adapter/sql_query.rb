@@ -1,59 +1,63 @@
 class SalesforceAdapter
   class SQLQuery
-    
+
     include DataMapper::Query::Conditions
-    
-    attr_reader :conditions, :order, :type, :from, :columns
-    
+
+    attr_reader :conditions, :order, :type, :from, :columns, :limit, :offset
+
     def initialize(query, type)
       @type       = type
       @query      = query
-      
+
       setup_statement
     end
-    
+
     def setup_statement
-            
+
       @conditions = (@query.conditions) ?
         conditions_statement(@query.conditions) : ''
-      
+
       @order      = (@query.order      && !@query.order.empty?) ?
         order_statement(@query.order) : ''
-      
+
       @columns    = columns_statement @query.fields
-      
+
       @from       = quote_name(@query.model.storage_name(@query.repository.name))
+      @limit = @query.limit
+      @offset = @query.offset
     end
-    
+
     def order_statement orders
       orders.map {|o| "#{o.target.field} #{o.operator.to_s.upcase}" }.join(', ')
     end
-    
+
     def columns_statement properties
       properties.map {|property| property_to_column_name(property) }.join(', ')
     end
-    
+
     def to_s
-      
+
       statement = ''
-      
+
       if @type == :select
         statement <<  "SELECT   #{columns}"
         statement << " FROM     #{from}"
         statement << " WHERE    #{conditions}"  unless conditions.to_s.empty?
         statement << " ORDER BY #{order}"       unless order.empty?
+        statement << " LIMIT    #{limit}"       if !limit.nil? && limit > 0
+        statement << " OFFSET   #{offset}"      unless !offset.nil? && offset > 0
       end
 
       statement
     end
-    
+
     def conditions_statement(conditions)
       case conditions
         when AbstractOperation  then  operation_statement(conditions)
         when AbstractComparison then comparison_statement(conditions)
       end
     end
-    
+
     def operation_statement(operation)
       case operation
         when NotOperation then "NOT(#{conditions_statement(operation.first)})"
@@ -63,9 +67,9 @@ class SalesforceAdapter
     end
 
     def comparison_statement(comparison)
-      
+
       return conditions_statement(comparison.foreign_key_mapping) if comparison.relationship?
-      
+
       value   = comparison.value
       subject = property_to_column_name comparison.subject
 
@@ -81,7 +85,7 @@ class SalesforceAdapter
 
       "#{subject} #{operator} #{quote_value(value, comparison.subject)}"
     end
-    
+
     def include_operator(value)
       case value
       when Array then 'IN'
@@ -101,7 +105,7 @@ class SalesforceAdapter
 
       res
     end
-    
+
     def quote_name(name)
       name
     end

@@ -9,7 +9,11 @@ class UpdateResourcesBuilder < ResourcesBuilder
         attributes.each do |field, property|
 
           next unless field && property
-          value = property.get(resource)
+          value = data[:attributes][property]
+
+          if property.name == :Id
+            value = resource[:Id]
+          end
 
           field_name = field[:name].to_sym
 
