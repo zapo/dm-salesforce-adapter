@@ -45,7 +45,7 @@ class SalesforceAdapter
         statement << " WHERE    #{conditions}"  unless conditions.to_s.empty?
         statement << " ORDER BY #{order}"       unless order.empty?
         statement << " LIMIT    #{limit}"       if !limit.nil? && limit > 0
-        statement << " OFFSET   #{offset}"      unless !offset.nil? && offset > 0
+        statement << " OFFSET   #{offset}"      if !offset.nil? && offset > 0
       end
 
       statement

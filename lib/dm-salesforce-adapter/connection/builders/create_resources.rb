@@ -9,7 +9,7 @@ class CreateResourcesBuilder < ResourcesBuilder
         attributes.each do |field, property|
 
           next unless field && property
-          value = data[:attributes][property]
+          value = property.get(resource)
 
           field_name = field[:name].to_sym
 
